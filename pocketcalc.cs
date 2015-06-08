@@ -12,7 +12,7 @@
 //   json-file from https://scratch.mit.edu/projects/13110194/
 
 using Gtk;
-//using System;
+using System;
 
 public class PocketCalc  {
 

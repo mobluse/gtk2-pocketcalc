@@ -9,13 +9,13 @@
 #      JSON-file from https://scratch.mit.edu/projects/13110194/
 
 use strict;
+use utf8;
 use Glib qw/TRUE FALSE/;
 use Gtk2 -init;
-use utf8;
 
 my $win = Gtk2::Window->new('toplevel');
-$win->signal_connect('delete-event'=> sub {Gtk2->main_quit()});
-$win->set_title('PocketCalc');
+$win->signal_connect('delete-event' => sub {Gtk2->main_quit()});
+$win->set_title('PocketCalc Unfinished');
 $win->set_border_width(5);
 $win->set_position('center-always');
 

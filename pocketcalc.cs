@@ -19,7 +19,7 @@ public class PocketCalc  {
   public static int Main (string[] args)
   {
     Application.Init ();
-    Window win = new Window ("PocketCalc");
+    Window win = new Window ("PocketCalc Unfinished");
     win.DeleteEvent += new DeleteEventHandler (Window_Delete);
     win.BorderWidth = 5;
     win.SetPosition (WindowPosition.CenterAlways);

@@ -2,13 +2,11 @@
 // Author: Mikael O. Bonnier <mikael.bonnier@gmail.com>
 // License: GPLv3+
 // Install on Linux: sudo apt-get install mono-complete gtk-sharp2
-// Build: mcs pocketcalc.cs -pkg:gtk-sharp-2.0
+// Build: mcs pocketcalc.cs -pkg:gtk-sharp-2.0 -target:winexe
 // Run: mono pocketcalc.exe (or ./pocketcalc.exe)
 // See: http://www.maketecheasier.com/write-c-sharp-programs-raspberry-pi/
 //   http://www.mono-project.com/docs/gui/gtksharp/installer-for-net-framework/
-//   If this gives error try replace the dll-file:
-//   http://originaldll.com/file/glibsharpglue-2.dll/31306.html
-//   Copy new glibsharpglue-2.dll to "C:\Program Files\GtkSharp\2.12\bin".
+//     Your mileage may vary. Google is your friend. 
 //   json-file from https://scratch.mit.edu/projects/13110194/
 
 using Gtk;

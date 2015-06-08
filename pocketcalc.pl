@@ -5,7 +5,7 @@
 # Install on Linux: sudo apt-get install libgtk2-perl
 # Run: perl pocketcalc.pl (or ./pocketcalc.pl)
 # See: http://gtk2-perl.sourceforge.net/doc/gtk2-perl-study-guide/
-#      http://gtk2-perl.sourceforge.net/win32/
+#      http://foobaring.blogspot.se/2013/03/howto-install-gtk2-in-activeperl-in.html
 #      JSON-file from https://scratch.mit.edu/projects/13110194/
 
 use strict;

@@ -6,7 +6,7 @@
 # Run: perl pocketcalc.pl (or ./pocketcalc.pl)
 # See: http://gtk2-perl.sourceforge.net/doc/gtk2-perl-study-guide/
 #      http://gtk2-perl.sourceforge.net/win32/
-#      https://scratch.mit.edu/projects/13110194/
+#      JSON-file from https://scratch.mit.edu/projects/13110194/
 
 use strict;
 use Glib qw/TRUE FALSE/;

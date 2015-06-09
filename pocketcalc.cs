@@ -3,6 +3,7 @@
 // License: GPLv3+
 // Install on Linux: sudo apt-get install mono-complete gtk-sharp2
 // Build: mcs pocketcalc.cs -pkg:gtk-sharp-2.0 -target:winexe
+//   Ubuntu 12.04: dmcs pocketcalc.cs -pkg:gtk-sharp-2.0 -t:winexe
 // Run: mono pocketcalc.exe (or ./pocketcalc.exe)
 // See: http://www.maketecheasier.com/write-c-sharp-programs-raspberry-pi/
 //   http://www.mono-project.com/docs/gui/gtksharp/installer-for-net-framework/

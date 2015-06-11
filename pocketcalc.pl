@@ -9,17 +9,80 @@
 #      JSON-file from https://scratch.mit.edu/projects/13110194/
 
 use strict;
+use warnings;
 use utf8;
+use POSIX;
 use Glib qw/TRUE FALSE/;
 use Gtk2 -init;
 
-my $win = Gtk2::Window->new('toplevel');
-$win->signal_connect('delete-event' => sub {Gtk2->main_quit()});
-$win->set_title('PocketCalc Unfinished');
-$win->set_border_width(5);
-$win->set_position('center-always');
+my $Program;
+my $b_Event;
+my $_paused;
+my $ZERO;
+my $Delay;
+my $Display;
+my $_op;
+my $_b_new_number;
+my $_b_decimal;
+my $_reg;
+my $_memory_idx;
+my @_memories;
+my $_memory_temp;
+my $_b_constant;
+my $_constant;
+my $_op_constant;
+my $_b_percent;
+my $_first;
+my $_b_function;
+my $_command;
+my $_condition;
+my $_b_decimal_extra;
+my $_b_eq_op;
+my $_b_found;
+my $_i;
+my $_name;
+my $_op_arg;
+my $_op_new;
+my $_pc;
+my $_temp;
+my $_value;
+my @_return_stack;
 
-my $display;
+init();
+init_win();
+
+sub init {
+  $b_Event = 0;
+  $_paused = 0;
+  $ZERO = 0.0000000000000009;
+  $Delay = 0.2;
+  $_op = '';
+  $_b_new_number = 1;
+  $_b_decimal = 0;
+  $_reg = 0;
+  $_memory_idx = 1;
+  $_memories[0] = 0;
+  $_memories[1] = 0;
+  $_memory_temp = 0;
+  $_b_constant = 0;
+  $_constant = 0;
+  $_op_constant = '';
+  $_b_percent = 0;
+  $_first = 0;
+  $_b_function = 0;
+}
+
+sub init_win {
+  my $win = Gtk2::Window->new('toplevel');
+  $win->signal_connect('delete-event' => sub {Gtk2->main_quit()});
+  $win->set_title('PocketCalc Unfinished');
+  $win->set_border_width(5);
+  $win->set_position('center-always');
+  my $table = fill_table();
+  $win->add($table);
+  $win->show_all();
+  Gtk2->main();
+}
 
 sub fill_table {
   my $tbl = Gtk2::Table->new(7, 5, FALSE);
@@ -28,12 +91,12 @@ sub fill_table {
   $btn_x->signal_connect('button-release-event' => \&rec_x);
   $tbl->attach_defaults ($btn_x, 0, 1, 0, 1);
 
-  $display = Gtk2::Entry->new();
-  $display->set_text('0');
-  $display->signal_connect(changed => sub {
-    my $text = $display->get_text;
-  });
-  $tbl->attach_defaults($display, 1, 6, 0, 1);
+  $Display = Gtk2::Entry->new();
+  $Display->set_text('0');
+  #$Display->signal_connect(changed => sub {
+  #  my $text = $Display->get_text;
+  #});
+  $tbl->attach_defaults($Display, 1, 6, 0, 1);
 
   my $btn_ms = Gtk2::Button->new('MS');
   $btn_ms->signal_connect('button-release-event' => \&rec_ms);
@@ -146,126 +209,342 @@ sub fill_table {
   return $tbl;
 }
 
-my $table = fill_table();
-$win->add($table);
-$win->show_all();
-
-Gtk2->main();
-
 sub rec_x {
-
+  $_op_new = 'X';
+  doOp();
 }
 
 sub rec_ms {
-
+  $_op_new = 'MS';
+  doOp();
 }
 
 sub rec_neg {
-
+  $_op_new = '±';
+  doOp();
 }
 
 sub rec_7 {
-  append('7');
+  $_value = '7';
+  append();
 }
 
 sub rec_8 {
 #  my ($widget,$event) = @_;
-  append('8');
+  $_value = '8';
+  append();
 }
 
 sub rec_9 {
-  append('9');
+  $_value = '9';
+  append();
 }
 
 sub rec_pct {
-
+  $_op_new = '%';
+  doOp();
 }
 
 sub rec_q {
-
+  #TODO
+  print("?\n");
 }
 
 sub rec_mc {
-
+  $_op_new = 'MC';
+  doOp();
 }
 
 sub rec_sqrt {
-
+  $_op_new = '√';
+  doOp();
 }
 
 sub rec_4 {
-  append('4');
+  $_value = '4';
+  append();
 }
 
 sub rec_5 {
-  append('5');
+  $_value = '5';
+  append();
 }
 
 sub rec_6 {
-  append('6');
+  $_value = '6';
+  append();
 }
 
 sub rec_mul {
-
+  $_op_new = '*';
+  doOp();
 }
 
 sub rec_div {
-
+  $_op_new = '/';
+  doOp();
 }
 
 sub rec_mr {
-
+  $_op_new = 'MR';
+  doOp();
 }
 
 sub rec_c {
-  $display->set_text('0');
+  $_op_new = 'C';
+  doOp();
 }
 
 sub rec_1 {
-  append('1');
+  $_value = '1';
+  append();
 }
 
 sub rec_2 {
-  append('2');
+  $_value = '2';
+  append();
 }
 
 sub rec_3 {
-  append('3');
+  $_value = '3';
+  append();
 }
 
 sub rec_add {
-
+  $_op_new = '+';
+  doOp();
 }
 
 sub rec_sub {
-
+  $_op_new = '-';
+  doOp();
 }
 
 sub rec_m_sub {
-
+  $_op_new = 'M-';
+  doOp();
 }
 
 sub rec_ac {
-  $display->set_text('0');
+  $_op_new = 'AC';
+  doOp();
 }
 
 sub rec_0 {
-  append('0');
+  $_value = '0';
+  append();
 }
 
 sub rec_pt {
-
+  $_value = '.';
+  append();
 }
 
 sub rec_eq {
-
+  $_op_new = '=';
+  doOp();
 }
 
 sub rec_m_add {
-
+  $_op_new = 'M+';
+  doOp();
 }
 
 sub append {
-  my ($number) = @_;
-  $display->set_text($display->get_text . $number);
+  $b_Event = 1;
+  $_b_decimal_extra = 0;
+  if ($_value eq '.') {
+    if (!$_b_decimal) {
+      if ($_b_new_number) {
+        $Display->set_text('0');
+        $_b_new_number = 0;
+      }
+      $_b_decimal = 1;
+    }
+    else {
+      $_b_decimal_extra = 1;
+    }
+  }
+  if (!$_b_decimal_extra) {
+    if ($_b_new_number) {
+      $Display->set_text($_value);
+      if ($_value ne '0') {
+        $_b_new_number = 0;
+      }
+    }
+    else {
+      $Display->set_text($Display->get_text=~tr/,/./r . $_value);
+    }
+  }
+}
+
+sub doOp {
+  $b_Event = 1;
+  if ($_b_percent) {
+    if ($_op_new ne '+' && $_op_new ne '-') {
+      $_b_percent = 0;
+    }
+  }
+  if (!$_b_percent) {
+    if ($_op_new eq '+' || $_op_new eq '-' || $_op_new eq '*' || $_op_new eq '/') {
+      if ($_b_new_number) {
+        if ($_op_new eq $_op && !$_b_constant) {
+          $_b_constant = 1;
+          $_constant = $Display->get_text=~tr/,/./r;
+          $_op_constant = $_op_new;
+        }
+        else {
+          $_b_constant = 0;
+        }
+      }
+      else {
+        $_b_constant = 0;
+      }
+      eq_code();
+    }
+    else {
+      $_op_arg = $_op_new;
+      b_eq_op();
+      if ($_b_eq_op) {
+        eq_code();
+      }
+    }
+  }
+  if ($_op_new eq '+') {
+    if ($_b_percent) {
+      $_reg = $_first + $_reg;
+      $Display->set_text($_reg);
+      $_b_percent = 0;
+    } 
+  }
+  elsif ($_op_new eq '-') {
+    if ($_b_percent) {
+      $_reg = $_first - $_reg;
+      $Display->set_text($_reg);
+      $_b_percent = 0;
+    }
+  }
+  elsif ($_op_new eq '±') {
+    $Display->set_text(-1*$Display->get_text=~tr/,/./r);
+    $_op_arg = $_op;
+    b_eq_op();
+    if ($_b_eq_op) {
+      $_reg = $Display->get_text=~tr/,/./r;
+    }
+    full();
+  }
+  elsif ($_op_new eq '√') {
+    $Display->set_text(sqrt($Display->get_text=~tr/,/./r));
+    fix_function();
+  }
+  elsif ($_op_new eq 'C') {
+    $Display->set_text('0');
+    $_op_arg = $_op;
+    b_eq_op();
+    if ($_b_eq_op) {
+      $_reg = $Display->get_text=~tr/,/./r;
+    }
+    $_b_new_number = 1;
+    $_b_decimal = 0;
+    $_b_function = 0;
+  }
+  elsif ($_op_new eq 'AC') {
+    $Display->set_text('0');
+    $_op = '';
+    $_reg = 0;
+    $_b_new_number = 1;
+    $_b_decimal = 0;
+    $_b_constant = 0;
+    $_b_function = 0;
+  }
+  elsif ($_op_new eq 'MC') {
+    $_memories[$_memory_idx] = 0;
+  }
+  elsif ($_op_new eq 'MR') {
+    $Display->set_text($_memories[$_memory_idx]);
+    fix_function();
+  }
+  elsif ($_op_new eq 'X') {
+    $_temp = $_memory_temp;
+    $_memory_temp = $Display->get_text=~tr/,/./r;
+    $Display->set_text($_temp);
+    fix_function();
+  }
+  elsif ($_op_new eq 'M-') {
+    $_memories[$_memory_idx] -= $_reg;
+  }
+  elsif ($_op_new eq 'M+') {
+    $_memories[$_memory_idx] += $_reg;
+  }
+  elsif ($_op_new eq 'MS') {
+    $_memory_idx = floor(0.5+$Display->get_text=~tr/,/./r)+1;
+    if ($_memory_idx >= @_memories) {
+      for ($_i = @_memories; $_i <= $_memory_idx; ++$_i) {
+        $_memories[$_i] = 0;
+      }
+    }
+  }  
+}
+
+sub eq_code {
+  $_op_arg = $_op_new;
+  b_eq_op();
+  if (!$_b_new_number || $_b_function || $_b_eq_op) {
+    if ($_b_constant) {
+      $_reg = $_constant;
+      $_op = $_op_constant;
+    }
+    $_b_percent = ($_op_new eq '%');
+    if ($_b_percent) {
+      $_first = $_reg;
+    }
+    if ($_op eq '+') {
+      $_reg += $Display->get_text=~tr/,/./r;
+    }
+    elsif ($_op eq '-') {
+      $_reg -= $Display->get_text=~tr/,/./r;
+    }
+    elsif ($_op eq '*') {
+      $_reg *= $Display->get_text=~tr/,/./r;
+    }
+    elsif ($_op eq '/') {
+      $_reg /= $Display->get_text=~tr/,/./r;
+    }
+    else {
+      $_op_arg = $_op;
+      b_eq_op();
+      if ($_b_eq_op || $_op eq '') {
+        $_reg = $Display->get_text=~tr/,/./r;
+      }
+    }
+    if ($_b_percent) {
+      $_reg /= 100;
+    }
+    $Display->set_text($_reg);
+    full();
+  }
+  $_op = $_op_new;
+  $_b_new_number = 1;
+  $_b_decimal = 0;
+  $_b_function = 0;
+}
+
+sub b_eq_op {
+  $_b_eq_op = ($_op_arg eq '=' || $_op_arg eq 'M-' || $_op_arg eq 'M-' || $_op_arg eq 'M+' || $_op_arg eq 'MS' || $_op_arg eq '%');
+}
+
+sub full {
+  $Display->set_text('' . $Display->get_text=~tr/,/./r) # Does nothing useful in Perl.
+}
+
+sub fix_function {
+  $_op_arg = $_op;
+  b_eq_op();
+  if ($_b_eq_op) {
+    $_reg = $Display->get_text=~tr/,/./r;
+  }
+  $_b_new_number = 1;
+  $_b_decimal = 0;
+  $_b_function = 1;
+  full();
 }

@@ -246,8 +246,13 @@ sub rec_pct {
 }
 
 sub rec_q {
-  #TODO
-  print("?\n");
+  print("Enter program ($Program):\n");
+  my $tmp = <>;
+  chomp($tmp);
+  if ($tmp) {
+    $Program = $tmp;
+  }
+  run();
 }
 
 sub rec_mc {

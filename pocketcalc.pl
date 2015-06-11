@@ -1,12 +1,15 @@
 #!/usr/bin/perl
 # pocketcalc.pl - An unfinished pocket calculator for Gtk2
-# Author: Mikael O. Bonnier <mikael.bonnier@gmail.com>
+# Author: Mikael O. Bonnier, Lund, Sweden.  <mikael.bonnier@gmail.com>
 # License: GPLv3+
 # Install on Linux: sudo apt-get install libgtk2-perl
 # Run: perl pocketcalc.pl (or ./pocketcalc.pl)
 # See: http://gtk2-perl.sourceforge.net/doc/gtk2-perl-study-guide/
 #      http://foobaring.blogspot.se/2013/03/howto-install-gtk2-in-activeperl-in.html
 #      JSON-file from https://scratch.mit.edu/projects/13110194/
+# TODO: Use popup-window for programming instead of terminal.
+#       Improve the looks of GUI.
+# Date: 2015-06-12.
 
 use strict;
 use warnings;
@@ -47,11 +50,13 @@ my $_pc;
 my $_temp;
 my $_value;
 my @_return_stack;
+my %_commands;
 
 init();
 init_win();
 
 sub init {
+  $Program = lc 'AC MC 1 M+ A0 10 / MR - MR / 2 M+ JT0 MR';
   $b_Event = 0;
   $_paused = 0;
   $ZERO = 0.0000000000000009;
@@ -70,6 +75,17 @@ sub init {
   $_b_percent = 0;
   $_first = 0;
   $_b_function = 0;
+  %_commands = (
+    'x' => \&rec_x, 'ms' => \&rec_ms,
+    'n' => \&rec_neg, '7' => \&rec_7, '8' => \&rec_8, '9' => \&rec_9, '%' => \&rec_pct, 
+      'q' => \&rec_q, 'mc' => \&rec_mc,
+    'v' => \&rec_sqrt, '4' => \&rec_4, '5' => \&rec_5, '6' => \&rec_6, '*' => \&rec_mul, 
+      '/' => \&rec_div, 'mr' => \&rec_mr,
+    'c' => \&rec_c, '1' => \&rec_1, '2' => \&rec_2, '3' => \&rec_3, '+' => \&rec_add, 
+      '-' => \&rec_sub, 'm-' => \&rec_m_sub,
+    'ac' => \&rec_ac, '0' => \&rec_0, '.' => \&rec_pt, 
+      '=' => \&rec_eq, 'm+' => \&rec_m_add
+  );
 }
 
 sub init_win {
@@ -94,7 +110,7 @@ sub fill_table {
   $Display = Gtk2::Entry->new();
   $Display->set_text('0');
   #$Display->signal_connect(changed => sub {
-  #  my $text = $Display->get_text;
+  #  my $text = $Display->get_text=~tr/,/./r;
   #});
   $tbl->attach_defaults($Display, 1, 6, 0, 1);
 
@@ -210,17 +226,17 @@ sub fill_table {
 }
 
 sub rec_x {
-  $_op_new = 'X';
+  $_op_new = 'x';
   doOp();
 }
 
 sub rec_ms {
-  $_op_new = 'MS';
+  $_op_new = 'ms';
   doOp();
 }
 
 sub rec_neg {
-  $_op_new = '±';
+  $_op_new = 'n';
   doOp();
 }
 
@@ -246,22 +262,28 @@ sub rec_pct {
 }
 
 sub rec_q {
-  print("Enter program ($Program):\n");
-  my $tmp = <>;
-  chomp($tmp);
-  if ($tmp) {
-    $Program = $tmp;
+  print "Enter program ($Program):\n";
+  my $prgm = '';
+  my $tmp = <STDIN>;
+  chomp $tmp;
+  while ($tmp) {
+    $prgm .= $tmp;
+    chomp ($tmp = <STDIN>);
   }
+  if ($prgm) {
+    $Program = lc $prgm;
+  }
+  print "Program: $Program\n";
   run();
 }
 
 sub rec_mc {
-  $_op_new = 'MC';
+  $_op_new = 'mc';
   doOp();
 }
 
 sub rec_sqrt {
-  $_op_new = '√';
+  $_op_new = 'v';
   doOp();
 }
 
@@ -291,12 +313,12 @@ sub rec_div {
 }
 
 sub rec_mr {
-  $_op_new = 'MR';
+  $_op_new = 'mr';
   doOp();
 }
 
 sub rec_c {
-  $_op_new = 'C';
+  $_op_new = 'c';
   doOp();
 }
 
@@ -326,12 +348,12 @@ sub rec_sub {
 }
 
 sub rec_m_sub {
-  $_op_new = 'M-';
+  $_op_new = 'm-';
   doOp();
 }
 
 sub rec_ac {
-  $_op_new = 'AC';
+  $_op_new = 'ac';
   doOp();
 }
 
@@ -351,7 +373,7 @@ sub rec_eq {
 }
 
 sub rec_m_add {
-  $_op_new = 'M+';
+  $_op_new = 'm+';
   doOp();
 }
 
@@ -429,7 +451,7 @@ sub doOp {
       $_b_percent = 0;
     }
   }
-  elsif ($_op_new eq '±') {
+  elsif ($_op_new eq 'n') {
     $Display->set_text(-1*$Display->get_text=~tr/,/./r);
     $_op_arg = $_op;
     b_eq_op();
@@ -438,11 +460,11 @@ sub doOp {
     }
     full();
   }
-  elsif ($_op_new eq '√') {
+  elsif ($_op_new eq 'v') {
     $Display->set_text(sqrt($Display->get_text=~tr/,/./r));
     fix_function();
   }
-  elsif ($_op_new eq 'C') {
+  elsif ($_op_new eq 'c') {
     $Display->set_text('0');
     $_op_arg = $_op;
     b_eq_op();
@@ -453,7 +475,7 @@ sub doOp {
     $_b_decimal = 0;
     $_b_function = 0;
   }
-  elsif ($_op_new eq 'AC') {
+  elsif ($_op_new eq 'ac') {
     $Display->set_text('0');
     $_op = '';
     $_reg = 0;
@@ -462,26 +484,26 @@ sub doOp {
     $_b_constant = 0;
     $_b_function = 0;
   }
-  elsif ($_op_new eq 'MC') {
+  elsif ($_op_new eq 'mc') {
     $_memories[$_memory_idx] = 0;
   }
-  elsif ($_op_new eq 'MR') {
+  elsif ($_op_new eq 'mr') {
     $Display->set_text($_memories[$_memory_idx]);
     fix_function();
   }
-  elsif ($_op_new eq 'X') {
+  elsif ($_op_new eq 'x') {
     $_temp = $_memory_temp;
     $_memory_temp = $Display->get_text=~tr/,/./r;
     $Display->set_text($_temp);
     fix_function();
   }
-  elsif ($_op_new eq 'M-') {
+  elsif ($_op_new eq 'm-') {
     $_memories[$_memory_idx] -= $_reg;
   }
-  elsif ($_op_new eq 'M+') {
+  elsif ($_op_new eq 'm+') {
     $_memories[$_memory_idx] += $_reg;
   }
-  elsif ($_op_new eq 'MS') {
+  elsif ($_op_new eq 'ms') {
     $_memory_idx = floor(0.5+$Display->get_text=~tr/,/./r)+1;
     if ($_memory_idx >= @_memories) {
       for ($_i = @_memories; $_i <= $_memory_idx; ++$_i) {
@@ -535,7 +557,8 @@ sub eq_code {
 }
 
 sub b_eq_op {
-  $_b_eq_op = ($_op_arg eq '=' || $_op_arg eq 'M-' || $_op_arg eq 'M-' || $_op_arg eq 'M+' || $_op_arg eq 'MS' || $_op_arg eq '%');
+  $_b_eq_op = ($_op_arg eq '=' || $_op_arg eq 'm-' || $_op_arg eq 'm+'
+    || $_op_arg eq 'ms' || $_op_arg eq '%');
 }
 
 sub full {
@@ -552,4 +575,95 @@ sub fix_function {
   $_b_decimal = 0;
   $_b_function = 1;
   full();
+}
+
+sub run {
+  $b_Event = 1;
+  if (!$_paused) {
+    $_pc = 1;
+    undef @_return_stack;
+  }
+  else {
+    $_paused = 0;
+  }
+  while (!$_paused && $_pc <= length $Program) {
+    $_command = substr $Program, $_pc-1, 1;
+    if ($_command eq 'p') {
+      $_paused = 1;
+    }
+    elsif ($_command eq '√') {
+      $_command = 'v';
+    }
+    elsif ($_command eq '±') {
+      $_command = 'n';
+    }
+    elsif ($_command eq 'a' || $_command eq 'm') {
+      ++$_pc;
+      $_command .= substr $Program, $_pc-1, 1;      
+    }
+    elsif ($_command eq '_') {
+      push @_return_stack, $_pc;
+    }
+    elsif ($_command eq '^') {
+      pop @_return_stack;
+    }
+    elsif ($_command eq 'j') {
+      ++$_pc;
+      $_condition = substr $Program, $_pc-1, 1;
+      ++$_pc;
+      if ($_condition eq 'u') {
+        search_anchor();
+      }
+      elsif ($_condition eq 't') {
+        if (abs($Display->get_text=~tr/,/./r) > $ZERO) {
+          search_anchor();
+        }
+      }
+      elsif ($_condition eq 'f') {
+        if (abs($Display->get_text=~tr/,/./r) <= $ZERO) {
+          search_anchor();
+        }
+      }
+      elsif ($_condition eq '-') {
+        if ($Display->get_text=~tr/,/./r < 0) {
+          search_anchor();
+        }
+      }
+      elsif ($_condition eq '+') {
+        if ($Display->get_text=~tr/,/./r >= 0) {
+          search_anchor();
+        }
+      }
+    }
+    call($_command);
+    ++$_pc;
+  }
+}
+
+sub call {
+  my ($cmd) = @_;
+  if (exists $_commands{$cmd}) {
+    &{$_commands{$cmd}};
+  }
+}
+
+sub search_anchor {
+  $_name = substr $Program, $_pc-1, 1;
+  if ($_name eq '^') {
+    $_pc = pop @_return_stack;
+    $_pc += 3;        
+  }
+  else {
+    $_b_found = 0;
+    for ($_i = 0; $_i < length $Program; ++$_i) {
+      if ((substr $Program, $_i, 1) eq 'a') {
+        ++$_i;
+        if ((substr $Program, $_i, 1) eq $_name) {
+          $_pc = $_i + 1;
+          $_b_found = 1;
+          last;
+        }
+      }
+    }
+  }
 }

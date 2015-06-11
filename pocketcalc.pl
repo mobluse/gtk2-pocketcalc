@@ -110,7 +110,7 @@ sub fill_table {
   $Display = Gtk2::Entry->new();
   $Display->set_text('0');
   #$Display->signal_connect(changed => sub {
-  #  my $text = $Display->get_text=~tr/,/./r;
+  #  my $text = &get_display;
   #});
   $tbl->attach_defaults($Display, 1, 6, 0, 1);
 
@@ -400,7 +400,7 @@ sub append {
       }
     }
     else {
-      $Display->set_text($Display->get_text=~tr/,/./r . $_value);
+      $Display->set_text(&get_display . $_value);
     }
   }
 }
@@ -417,7 +417,7 @@ sub doOp {
       if ($_b_new_number) {
         if ($_op_new eq $_op && !$_b_constant) {
           $_b_constant = 1;
-          $_constant = $Display->get_text=~tr/,/./r;
+          $_constant = &get_display;
           $_op_constant = $_op_new;
         }
         else {
@@ -452,16 +452,16 @@ sub doOp {
     }
   }
   elsif ($_op_new eq 'n') {
-    $Display->set_text(-1*$Display->get_text=~tr/,/./r);
+    $Display->set_text(-1*&get_display);
     $_op_arg = $_op;
     b_eq_op();
     if ($_b_eq_op) {
-      $_reg = $Display->get_text=~tr/,/./r;
+      $_reg = &get_display;
     }
     full();
   }
   elsif ($_op_new eq 'v') {
-    $Display->set_text(sqrt($Display->get_text=~tr/,/./r));
+    $Display->set_text(sqrt(&get_display));
     fix_function();
   }
   elsif ($_op_new eq 'c') {
@@ -469,7 +469,7 @@ sub doOp {
     $_op_arg = $_op;
     b_eq_op();
     if ($_b_eq_op) {
-      $_reg = $Display->get_text=~tr/,/./r;
+      $_reg = &get_display;
     }
     $_b_new_number = 1;
     $_b_decimal = 0;
@@ -493,7 +493,7 @@ sub doOp {
   }
   elsif ($_op_new eq 'x') {
     $_temp = $_memory_temp;
-    $_memory_temp = $Display->get_text=~tr/,/./r;
+    $_memory_temp = &get_display;
     $Display->set_text($_temp);
     fix_function();
   }
@@ -504,7 +504,7 @@ sub doOp {
     $_memories[$_memory_idx] += $_reg;
   }
   elsif ($_op_new eq 'ms') {
-    $_memory_idx = floor(0.5+$Display->get_text=~tr/,/./r)+1;
+    $_memory_idx = floor(0.5+&get_display)+1;
     if ($_memory_idx >= @_memories) {
       for ($_i = @_memories; $_i <= $_memory_idx; ++$_i) {
         $_memories[$_i] = 0;
@@ -526,22 +526,22 @@ sub eq_code {
       $_first = $_reg;
     }
     if ($_op eq '+') {
-      $_reg += $Display->get_text=~tr/,/./r;
+      $_reg += &get_display;
     }
     elsif ($_op eq '-') {
-      $_reg -= $Display->get_text=~tr/,/./r;
+      $_reg -= &get_display;
     }
     elsif ($_op eq '*') {
-      $_reg *= $Display->get_text=~tr/,/./r;
+      $_reg *= &get_display;
     }
     elsif ($_op eq '/') {
-      $_reg /= $Display->get_text=~tr/,/./r;
+      $_reg /= &get_display;
     }
     else {
       $_op_arg = $_op;
       b_eq_op();
       if ($_b_eq_op || $_op eq '') {
-        $_reg = $Display->get_text=~tr/,/./r;
+        $_reg = &get_display;
       }
     }
     if ($_b_percent) {
@@ -562,19 +562,23 @@ sub b_eq_op {
 }
 
 sub full {
-  $Display->set_text('' . $Display->get_text=~tr/,/./r) # Does nothing useful in Perl.
+  $Display->set_text('' . &get_display) # Does nothing useful in Perl.
 }
 
 sub fix_function {
   $_op_arg = $_op;
   b_eq_op();
   if ($_b_eq_op) {
-    $_reg = $Display->get_text=~tr/,/./r;
+    $_reg = &get_display;
   }
   $_b_new_number = 1;
   $_b_decimal = 0;
   $_b_function = 1;
   full();
+}
+
+sub get_display {
+  return $Display->get_text=~tr/,/./r;
 }
 
 sub run {
@@ -615,35 +619,28 @@ sub run {
         search_anchor();
       }
       elsif ($_condition eq 't') {
-        if (abs($Display->get_text=~tr/,/./r) > $ZERO) {
+        if (abs(&get_display) > $ZERO) {
           search_anchor();
         }
       }
       elsif ($_condition eq 'f') {
-        if (abs($Display->get_text=~tr/,/./r) <= $ZERO) {
+        if (abs(&get_display) <= $ZERO) {
           search_anchor();
         }
       }
       elsif ($_condition eq '-') {
-        if ($Display->get_text=~tr/,/./r < 0) {
+        if (&get_display < 0) {
           search_anchor();
         }
       }
       elsif ($_condition eq '+') {
-        if ($Display->get_text=~tr/,/./r >= 0) {
+        if (&get_display >= 0) {
           search_anchor();
         }
       }
     }
     call($_command);
     ++$_pc;
-  }
-}
-
-sub call {
-  my ($cmd) = @_;
-  if (exists $_commands{$cmd}) {
-    &{$_commands{$cmd}};
   }
 }
 
@@ -665,5 +662,12 @@ sub search_anchor {
         }
       }
     }
+  }
+}
+
+sub call {
+  my ($cmd) = @_;
+  if (exists $_commands{$cmd}) {
+    &{$_commands{$cmd}};
   }
 }

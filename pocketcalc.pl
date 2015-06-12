@@ -227,17 +227,17 @@ sub fill_table {
 
 sub rec_x {
   $_op_new = 'x';
-  doOp();
+  do_op();
 }
 
 sub rec_ms {
   $_op_new = 'ms';
-  doOp();
+  do_op();
 }
 
 sub rec_neg {
   $_op_new = 'n';
-  doOp();
+  do_op();
 }
 
 sub rec_7 {
@@ -258,7 +258,7 @@ sub rec_9 {
 
 sub rec_pct {
   $_op_new = '%';
-  doOp();
+  do_op();
 }
 
 sub rec_q {
@@ -279,12 +279,12 @@ sub rec_q {
 
 sub rec_mc {
   $_op_new = 'mc';
-  doOp();
+  do_op();
 }
 
 sub rec_sqrt {
   $_op_new = 'v';
-  doOp();
+  do_op();
 }
 
 sub rec_4 {
@@ -304,22 +304,22 @@ sub rec_6 {
 
 sub rec_mul {
   $_op_new = '*';
-  doOp();
+  do_op();
 }
 
 sub rec_div {
   $_op_new = '/';
-  doOp();
+  do_op();
 }
 
 sub rec_mr {
   $_op_new = 'mr';
-  doOp();
+  do_op();
 }
 
 sub rec_c {
   $_op_new = 'c';
-  doOp();
+  do_op();
 }
 
 sub rec_1 {
@@ -339,22 +339,22 @@ sub rec_3 {
 
 sub rec_add {
   $_op_new = '+';
-  doOp();
+  do_op();
 }
 
 sub rec_sub {
   $_op_new = '-';
-  doOp();
+  do_op();
 }
 
 sub rec_m_sub {
   $_op_new = 'm-';
-  doOp();
+  do_op();
 }
 
 sub rec_ac {
   $_op_new = 'ac';
-  doOp();
+  do_op();
 }
 
 sub rec_0 {
@@ -369,12 +369,12 @@ sub rec_pt {
 
 sub rec_eq {
   $_op_new = '=';
-  doOp();
+  do_op();
 }
 
 sub rec_m_add {
   $_op_new = 'm+';
-  doOp();
+  do_op();
 }
 
 sub append {
@@ -405,7 +405,7 @@ sub append {
   }
 }
 
-sub doOp {
+sub do_op {
   $b_Event = 1;
   if ($_b_percent) {
     if ($_op_new ne '+' && $_op_new ne '-') {
@@ -645,7 +645,7 @@ sub search_anchor {
     $_pc = pop @_return_stack;
     $_pc += 3;        
   }
-  else {
+  else { # Cashing of addresses would speed up.
     $_b_found = 0;
     for ($_i = 0; $_i < length $Program; ++$_i) {
       if ((substr $Program, $_i, 1) eq 'a') {

@@ -19,7 +19,7 @@ use Glib qw/TRUE FALSE/;
 use Gtk2 -init;
 
 my $Program;
-my $b_Event;
+#my $b_Event;
 my $_paused;
 my $ZERO;
 my $Delay;
@@ -38,6 +38,7 @@ my $_b_percent;
 my $_first;
 my $_b_function;
 my $_command;
+my %_commands;
 my $_condition;
 my $_b_decimal_extra;
 #my $_b_eq_op;
@@ -50,14 +51,13 @@ my $_pc;
 my $_temp;
 my $_value;
 my @_return_stack;
-my %_commands;
 
 init();
 init_win();
 
 sub init {
   $Program = lc 'AC MC 1 M+ A0 10 / MR - MR / 2 M+ JT0 MR';
-  $b_Event = 0;
+  #$b_Event = 0;
   $_paused = 0;
   $ZERO = 0.0000000000000009;
   $Delay = 0.2;
@@ -378,7 +378,7 @@ sub rec_m_add {
 }
 
 sub append {
-  $b_Event = 1;
+  #$b_Event = 1;
   $_b_decimal_extra = 0;
   if ($_value eq '.') {
     if (!$_b_decimal) {
@@ -406,7 +406,7 @@ sub append {
 }
 
 sub do_op {
-  $b_Event = 1;
+  #$b_Event = 1;
   if ($_b_percent) {
     if ($_op_new ne '+' && $_op_new ne '-') {
       $_b_percent = 0;
@@ -577,7 +577,7 @@ sub get_display {
 }
 
 sub run {
-  $b_Event = 1;
+  #$b_Event = 1;
   if (!$_paused) {
     $_pc = 1;
     undef @_return_stack;

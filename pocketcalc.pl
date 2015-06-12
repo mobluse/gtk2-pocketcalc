@@ -40,7 +40,7 @@ my $_b_function;
 my $_command;
 my $_condition;
 my $_b_decimal_extra;
-my $_b_eq_op;
+#my $_b_eq_op;
 my $_b_found;
 my $_i;
 my $_name;
@@ -431,8 +431,7 @@ sub doOp {
     }
     else {
       $_op_arg = $_op_new;
-      b_eq_op();
-      if ($_b_eq_op) {
+      if (&b_eq_op) {
         eq_code();
       }
     }
@@ -454,8 +453,7 @@ sub doOp {
   elsif ($_op_new eq 'n') {
     $Display->set_text(-1*&get_display);
     $_op_arg = $_op;
-    b_eq_op();
-    if ($_b_eq_op) {
+    if (&b_eq_op) {
       $_reg = &get_display;
     }
     full();
@@ -467,8 +465,7 @@ sub doOp {
   elsif ($_op_new eq 'c') {
     $Display->set_text('0');
     $_op_arg = $_op;
-    b_eq_op();
-    if ($_b_eq_op) {
+    if (&b_eq_op) {
       $_reg = &get_display;
     }
     $_b_new_number = 1;
@@ -515,8 +512,7 @@ sub doOp {
 
 sub eq_code {
   $_op_arg = $_op_new;
-  b_eq_op();
-  if (!$_b_new_number || $_b_function || $_b_eq_op) {
+  if (!$_b_new_number || $_b_function || &b_eq_op) {
     if ($_b_constant) {
       $_reg = $_constant;
       $_op = $_op_constant;
@@ -539,8 +535,7 @@ sub eq_code {
     }
     else {
       $_op_arg = $_op;
-      b_eq_op();
-      if ($_b_eq_op || $_op eq '') {
+      if (&b_eq_op || $_op eq '') {
         $_reg = &get_display;
       }
     }
@@ -557,8 +552,9 @@ sub eq_code {
 }
 
 sub b_eq_op {
-  $_b_eq_op = ($_op_arg eq '=' || $_op_arg eq 'm-' || $_op_arg eq 'm+'
+  my $b_eq_op = ($_op_arg eq '=' || $_op_arg eq 'm-' || $_op_arg eq 'm+'
     || $_op_arg eq 'ms' || $_op_arg eq '%');
+  return $b_eq_op;
 }
 
 sub full {
@@ -567,8 +563,7 @@ sub full {
 
 sub fix_function {
   $_op_arg = $_op;
-  b_eq_op();
-  if ($_b_eq_op) {
+  if (&b_eq_op) {
     $_reg = &get_display;
   }
   $_b_new_number = 1;
